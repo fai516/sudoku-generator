@@ -1,0 +1,67 @@
+$size: 350px;
+$border: 2px solid black;
+$shadow-color: hsl(0,0%,80%);
+$font: 'Roboto', sans-serif;
+$input-size: 90%;
+$input-font-size: 28px;
+body{
+  font-family: $font;
+}
+#game{
+  #board{
+    display: grid;
+    width:$size;
+    height: $size;
+    grid-template: repeat(9,1fr)/repeat(9,1fr);
+
+    .square{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px dashed black;
+      &:nth-child(9n-5),
+      &:nth-child(9n-2){
+        border-left: $border;
+      }
+      &:nth-child(9n-6),
+      &:nth-child(9n-3){
+        border-right: $border;
+      }
+      &:nth-child(n+28):nth-child(-n+36),
+      &:nth-child(n+55):nth-child(-n+63){
+        border-top: $border;
+      }
+      &:nth-child(n+19):nth-child(-n+27),
+      &:nth-child(n+46):nth-child(-n+54){
+        border-bottom: $border;
+      }
+
+      &:nth-child(9n-3),
+      &:nth-child(9n-4),
+      &:nth-child(9n-5),
+      &:nth-child(n+28):nth-child(-n+36),
+      &:nth-child(n+37):nth-child(-n+45),
+      &:nth-child(n+46):nth-child(-n+54){
+        background-color: $shadow-color;
+      }
+      &:nth-child(n+31):nth-child(-n+33),
+      &:nth-child(n+40):nth-child(-n+42),
+      &:nth-child(n+49):nth-child(-n+51){
+        background-color: white!important;
+      }
+
+      input[type="text"]{
+        background-color: inherit;
+        border: 0;
+        margin: 0;
+        width:$input-size;
+        height:$input-size;
+        text-align: center;
+        font-size: $input-font-size;
+        &:focus{
+          outline: none;
+        }
+      }
+    }
+  }
+}
