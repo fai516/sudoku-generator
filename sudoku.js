@@ -41,7 +41,6 @@ class Puzzle extends React.Component{
 class Game extends React.Component{
   constructor(props){
     super(props);
-    this. = "AA"
     this.rowIndexes = Array.from(Array(9).keys(),x=>9*x);
     //[0-8]
     let colIndexes = Array.from(Array(9).keys());
@@ -60,9 +59,7 @@ class Game extends React.Component{
 
   puzzleGenerator(){
     let arr = this.state.squares;
-    console.log(this.a);
-    checkValid();
-
+    console.log(indexGenerator(9,"row",42))
 
   }
 
@@ -100,21 +97,75 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-/*
- *  indexGenerator(d,t,) 
- *  d: dimension(Number)
- *  t: type(String)
- *  pos: position(Number)(optional)
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *  indexGenerator(d,t,pos):
+ *  Purpose: Create an Array of index numbers correspond to specific index and type.
+ *  Argument: d = Dimention of the puzzle. sudoku is a 9x9 puzzle so the default value is 9
+ *            t = Type of direction. Either "row", "col", or "grid". Otherwise it returns 
+ *                empty array
+ *            pos = index of specific square. If pos is not given, it will only print either
+ *                  1st row/col or grid ref index depending on type of direction; otherwise 
+ *                  it output its corresponding indexes.
+ *  Return type: Array(9)[Number]
+ *  Example: indexGenerator(9,t):
+ *           t="row"  -> [0,9,18,27,36,45,54,63,72]
+ *           t="col"  -> [0,1,2,3,4,5,6,7,8]
+ *           t="grid" -> [0,3,6,27,30,33,54,57,60]
+ * 
+ *           indexGenerator(9,t,42):
+ *           t="row"  -> [36,37,38,39,40,41,42,43,44]
+ *           t="col"  -> [6,15,24,33,42,51,60,69,78]
+ *           t="grid" -> [33,34,35,42,43,44,51,52,53]
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 function indexGenerator(d=9,t,pos){
-  let base = Math.sqrt(d)
+  let base = Math.sqrt(d);
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+   * createArray() create a length of {l} array[0..l] and maps to function {func}
+   * Example: createArray(9,x=>x*x)
+   *          [0..9] -> [0,1,4,9,..,64]
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
+  let createArray = function(l,func){
+    return Array.from(Array(l).keys(),func);
+  }
   if(pos==undefined){
     switch(t){
-      case "row": return Array.from(Array(d).keys(),x=>d*x);
-      case "col": return Array.from(Array(d).keys());
-      case "grid": return Array.from(Array(base).keys(),x=>base*x).reduce(function(acc,cur){
-        return acc.concat(Array.from(Array(base).keys(),x=>base*d*x+cur))
-      },[])
+      case "row": return createArray(d,x=>d*x); //[0,9,18,..,72],d=9
+      case "col": return createArray(d); //[0,1,2,..,8],d=9
+
+      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+       * The first createArray() output [0,27,54],d=9
+       * The callback takes each element to create a new array and combine the result of 
+       * last callback.
+       * Walkthrough:
+       * 0  -> [0,3,6]
+       * 27 -> [27,30,33]
+       * 54 -> [54,57,60]
+       * final result: [0,3,6,27,30,33,54,57,60]
+       * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+      case "grid": return createArray(base,x=>base*d*x).reduce(function(acc,cur){
+        return acc.concat(createArray(base,x=>cur+x*base))
+      },[])//[0,3,6,27,30,33,54,57,60],d=9
+      default: return [];
+    }
+  }
+  else{
+    let rowRef = Math.floor(pos/9); //rowRef=4 => pos=42
+    let colRef = pos%d; //colRef=6 => pos=42
+
+    //rowRef=4,colRef=6 => [3,6]
+    let [gRowRef,gColRef] = [rowRef,colRef].map(x=>Math.floor(x/base)*base);
+    switch(t){
+      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+       * Example: pos=42,then rowRef=4,colRef=6
+       * case "row":  all the indexes in the 4th row [36,37,38,..,43,44]
+       * case "col":  all the indexes in the 6th col [6,15,24,..,69,78]
+       * case "grid": rowRef=4,colRef=6 belongs to ref index 33 [33,34,35,42,43,44,51,52,53]
+       * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+      case "row": return createArray(d,n=>n+9*rowRef); // return the {rowRef}th row
+      case "col": return createArray(d,n=>n*9+colRef); // return the {colRef}th col
+      case "grid":return createArray(base,x=>x+gRowRef).reduce(function(acc,cur){
+          return acc.concat(createArray(base,x=>9*cur+gColRef+x))
+        },[])
       default: return [];
     }
   }
@@ -134,93 +185,4 @@ function dummyPuzzleExample(){
 }
 function dummyStart(){
 
-}
-function checkValid(){
-  //[0,9,18,..,72]
-  let rowIndexes = Array.from(Array(9).keys(),x=>9*x);
-  //[0-8]
-  let colIndexes = Array.from(Array(9).keys());
-  //[0,3,6,27,30,33,54,57,60]
-  let gridIndexes = Array.from(Array(3).keys(),x=>3*x).reduce(function(acc,cur){
-    return acc.concat(Array.from(Array(3).keys(),x=>27*x+cur))
-  },[])
-  console.log(rowIndexes);
-  console.log(colIndexes);
-  console.log(gridIndexes);
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *  getColValuesFromPos(arr,pos):
- *  Purpose: return a list of all squares value with the same column of a given position
- *  Argument: arr = an ref array with length of 81, which stores all square values.
- *            pos = position of a square [0..80]
- *  Return type: Array(9)
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function getColValuesFromPos(arr,pos){
-  let colRef = pos%9; //nth column of the position [0..8]
-
-  /*
-   *  Explain: Array.from() returns an array [0..8] because .keys() return iterators from a length           *  of 9 array. For example, if pos=12 then colRef=3 it will first generator an array                      *  [0..8] and transfer into [3,12,21,..,75](these are indexes of targetValue) then maps into 
-   *  cooresponing value as final result. 
-   */
-  return Array.from(Array(9).keys(),n =>arr[n*9+colRef]);
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *  getRowValuesFromPos(arr,pos):
- *  Purpose: return a list of all squares value with the same row of a given position
- *  Argument: arr = an ref array with length of 81, which stores all square values.
- *            pos = position of a square [0..80]
- *  Return type: Array(9)
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function getRowValuesFromPos(arr,pos){ //row
-  let rowRef = Math.floor(pos/9); //nth row of the position [0..8]
-
-  /* 
-   * Explain: Same idea of getColValuesFromPos()
-   *          If pos=22,then rowRef=2
-   *          [0..8]->[18,19,..,26]->[arr[18],arr[19],..,arr[26]]
-   */
-  return Array.from(Array(9).keys(),n =>arr[n+9*rowRef]); 
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *  getGridValuesFromPos(arr,pos):
- *  Purpose: return a list of all squares value with the same grid of a given position. 
- *           A grid is a 3 by 3 squares collection
- *  Argument: arr = an ref array with length of 81, which stores all square values.
- *            pos = position of a square [0..80]
- *  Return type: Array(9)
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function getGridValuesFromPos(arr,pos){ //3x3 grid
-  /* 
-   * GridRowRef and GridColRef:
-   *  Any position number will be transform into top-left sqaure from its enclosed grid. 
-   *  For example, position [0-2,9-11,18-20] all point to Grid#0 (0,0)
-   *  [60-62,69-71,78-80] -> Grid#8 (6,6)
-   */
-  let [gRowRef,gColRef] = [Math.floor(pos/9),pos%9].map(x=>Math.floor(x/3)*3);
-
-  /* 
-   * This creates row numbers of its belonging Grid. Notice that Grid#0-2 has the same row numbers. For      *  example, when pos=67 -> [gRowRef,gColRef]=[6,3] -> rowsArray=[6,7,8]
-   */
-  let rowsArray = Array.from(Array(3).keys(),x=>x+gRowRef)
-
-
-  /* 
-   *  reduce() can mutate an array to be triple sized or even bigger! It iterates every item 
-   *   from its calling array, creating new Array(3) of each callback.
-   *  Example: rowsArray=[6,7,8],gColRef=3
-   *      each callback: 6->[57,58,59],7->[66,67,68],8->[75,76,77]
-   *      result=[arr(57)...arr(77)]
-   */
-  return rowsArray.reduce(function(acc,cur){
-    return acc.concat(Array.from(Array(3).keys(),x=>arr[9*cur+gColRef+x]))
-  },[])
-  /* 
-   *  Notice that all 3 expressions above can be combined into a single expression, 
-   *  but the complexity of the structure would be crazily high :-O
-   */
 }
