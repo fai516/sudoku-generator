@@ -2,17 +2,17 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-#game #board {
+#game #puzzle {
   display: -ms-grid;
   display: grid;
-  width: 350px;
-  height: 350px;
+  width: 550px;
+  height: 550px;
   -ms-grid-rows: (1fr)[9];
   -ms-grid-columns: (1fr)[9];
       grid-template: repeat(9, 1fr)/repeat(9, 1fr);
 }
 
-#game #board .square {
+#game #puzzle .square {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -25,41 +25,41 @@ body {
   border: 1px dashed black;
 }
 
-#game #board .square:nth-child(9n-5), #game #board .square:nth-child(9n-2) {
+#game #puzzle .square:nth-child(9n-5), #game #puzzle .square:nth-child(9n-2) {
   border-left: 2px solid black;
 }
 
-#game #board .square:nth-child(9n-6), #game #board .square:nth-child(9n-3) {
+#game #puzzle .square:nth-child(9n-6), #game #puzzle .square:nth-child(9n-3) {
   border-right: 2px solid black;
 }
 
-#game #board .square:nth-child(n+28):nth-child(-n+36), #game #board .square:nth-child(n+55):nth-child(-n+63) {
+#game #puzzle .square:nth-child(n+28):nth-child(-n+36), #game #puzzle .square:nth-child(n+55):nth-child(-n+63) {
   border-top: 2px solid black;
 }
 
-#game #board .square:nth-child(n+19):nth-child(-n+27), #game #board .square:nth-child(n+46):nth-child(-n+54) {
+#game #puzzle .square:nth-child(n+19):nth-child(-n+27), #game #puzzle .square:nth-child(n+46):nth-child(-n+54) {
   border-bottom: 2px solid black;
 }
 
-#game #board .square:nth-child(9n-3), #game #board .square:nth-child(9n-4), #game #board .square:nth-child(9n-5), #game #board .square:nth-child(n+28):nth-child(-n+36), #game #board .square:nth-child(n+37):nth-child(-n+45), #game #board .square:nth-child(n+46):nth-child(-n+54) {
+#game #puzzle .square:nth-child(9n-3), #game #puzzle .square:nth-child(9n-4), #game #puzzle .square:nth-child(9n-5), #game #puzzle .square:nth-child(n+28):nth-child(-n+36), #game #puzzle .square:nth-child(n+37):nth-child(-n+45), #game #puzzle .square:nth-child(n+46):nth-child(-n+54) {
   background-color: #cccccc;
 }
 
-#game #board .square:nth-child(n+31):nth-child(-n+33), #game #board .square:nth-child(n+40):nth-child(-n+42), #game #board .square:nth-child(n+49):nth-child(-n+51) {
+#game #puzzle .square:nth-child(n+31):nth-child(-n+33), #game #puzzle .square:nth-child(n+40):nth-child(-n+42), #game #puzzle .square:nth-child(n+49):nth-child(-n+51) {
   background-color: white !important;
 }
 
-#game #board .square input[type="text"] {
+#game #puzzle .square input[type="text"] {
   background-color: inherit;
   border: 0;
   margin: 0;
   width: 90%;
   height: 90%;
   text-align: center;
-  font-size: 28px;
+  font-size: 16px;
 }
 
-#game #board .square input[type="text"]:focus {
+#game #puzzle .square input[type="text"]:focus {
   outline: none;
 }
 /*# sourceMappingURL=style.css.map */

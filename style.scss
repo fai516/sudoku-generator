@@ -1,14 +1,14 @@
-$size: 350px;
+$size: 550px;
 $border: 2px solid black;
 $shadow-color: hsl(0,0%,80%);
 $font: 'Roboto', sans-serif;
 $input-size: 90%;
-$input-font-size: 28px;
+$input-font-size: 16px;
 body{
   font-family: $font;
 }
 #game{
-  #board{
+  #puzzle{
     display: grid;
     width:$size;
     height: $size;
