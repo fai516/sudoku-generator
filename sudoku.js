@@ -5,10 +5,10 @@ class Square extends React.Component {
       <div className="square">
         <input type="text" 
                id={this.props.id}
-               maxLength="1"
-               //defaultValue={this.props.value}
+               maxLength="2"
+               //value={this.props.value}
                defaultValue={this.props.id}
-               onInput = {this.props.handleInput}/>
+               onChange = {this.props.handleInput}readOnly/>
       </div>
       );
   }
@@ -24,8 +24,8 @@ class Puzzle extends React.Component{
       squareItems.push(
         <Square value={this.showProperValue(this.props.sqaures[i])} 
                 key={i} 
-                //id={i}
-                id={`${Math.floor(i/9)},${i%9}#${i}`}
+                id={i}
+                //id={`${Math.floor(i/9)},${i%9}#${i}`}
                 handleInput={this.props.handleSquareInput}
         />
       );
@@ -41,18 +41,39 @@ class Puzzle extends React.Component{
 class Game extends React.Component{
   constructor(props){
     super(props);
+    this. = "AA"
+    this.rowIndexes = Array.from(Array(9).keys(),x=>9*x);
+    //[0-8]
+    let colIndexes = Array.from(Array(9).keys());
+    //[0,3,6,27,30,33,54,57,60]
+    let gridIndexes = Array.from(Array(3).keys(),x=>3*x).reduce(function(acc,cur){
+      return acc.concat(Array.from(Array(3).keys(),x=>27*x+cur))
+    },[])
     this.state = {
-      squares: Array(81).fill("0")
+      //squares: Array(81).fill("0")
+      squares: dummyPuzzleExample(),
     };
     this.handleSquareInput=this.handleSquareInput.bind(this);
-    dummyStart();
+    this.puzzleGenerator=this.puzzleGenerator.bind(this);
+    this.puzzleGenerator();
   }
+
+  puzzleGenerator(){
+    let arr = this.state.squares;
+    console.log(this.a);
+    checkValid();
+
+
+  }
+
   handleSquareInput(evt){
     console.log("setState begin")
+    let input = evt.nativeEvent.data;
+    let char = (input>="1"&&input<="9"?input:"0");
     this.setState({
-      squares: Array(81).fill(evt.nativeEvent.data)
+      squares: Array(81).fill(char)
     });
-    console.log("setState end")
+    console.log(this.state.squares)
     /*
     let num = evt.nativeEvent.data;
     let pos = parseInt(evt.target.id);
@@ -62,7 +83,6 @@ class Game extends React.Component{
     console.log(this.state.squares);
     */
   }
-  generatePuzzle
   render(){
     return(
       <div id="game">
@@ -81,13 +101,54 @@ ReactDOM.render(
 );
 
 /*
-  square:[0,81]
+ *  indexGenerator(d,t,) 
+ *  d: dimension(Number)
+ *  t: type(String)
+ *  pos: position(Number)(optional)
+ */
+function indexGenerator(d=9,t,pos){
+  let base = Math.sqrt(d)
+  if(pos==undefined){
+    switch(t){
+      case "row": return Array.from(Array(d).keys(),x=>d*x);
+      case "col": return Array.from(Array(d).keys());
+      case "grid": return Array.from(Array(base).keys(),x=>base*x).reduce(function(acc,cur){
+        return acc.concat(Array.from(Array(base).keys(),x=>base*d*x+cur))
+      },[])
+      default: return [];
+    }
+  }
+}
 
-
-*/
+function dummyPuzzleExample(){
+  let str = "435269781"+
+             "682571493"+
+             "197834562"+
+             "826195347"+
+             "374682915"+
+             "951743628"+
+             "519326874"+
+             "248957136"+
+             "763418259";
+  return [...str];
+}
 function dummyStart(){
 
 }
+function checkValid(){
+  //[0,9,18,..,72]
+  let rowIndexes = Array.from(Array(9).keys(),x=>9*x);
+  //[0-8]
+  let colIndexes = Array.from(Array(9).keys());
+  //[0,3,6,27,30,33,54,57,60]
+  let gridIndexes = Array.from(Array(3).keys(),x=>3*x).reduce(function(acc,cur){
+    return acc.concat(Array.from(Array(3).keys(),x=>27*x+cur))
+  },[])
+  console.log(rowIndexes);
+  console.log(colIndexes);
+  console.log(gridIndexes);
+}
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  getColValuesFromPos(arr,pos):
@@ -127,7 +188,8 @@ function getRowValuesFromPos(arr,pos){ //row
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  getGridValuesFromPos(arr,pos):
- *  Purpose: return a list of all squares value with the same grid of a given position. A grid is a 3 by 3  *            squares collection
+ *  Purpose: return a list of all squares value with the same grid of a given position. 
+ *           A grid is a 3 by 3 squares collection
  *  Argument: arr = an ref array with length of 81, which stores all square values.
  *            pos = position of a square [0..80]
  *  Return type: Array(9)
@@ -147,11 +209,18 @@ function getGridValuesFromPos(arr,pos){ //3x3 grid
   let rowsArray = Array.from(Array(3).keys(),x=>x+gRowRef)
 
 
-
+  /* 
+   *  reduce() can mutate an array to be triple sized or even bigger! It iterates every item 
+   *   from its calling array, creating new Array(3) of each callback.
+   *  Example: rowsArray=[6,7,8],gColRef=3
+   *      each callback: 6->[57,58,59],7->[66,67,68],8->[75,76,77]
+   *      result=[arr(57)...arr(77)]
+   */
   return rowsArray.reduce(function(acc,cur){
-    return acc.concat(Array.from(Array(3).keys(),x=>arr(9*cur+gColRef+x)))
+    return acc.concat(Array.from(Array(3).keys(),x=>arr[9*cur+gColRef+x]))
   },[])
   /* 
-
-  */
+   *  Notice that all 3 expressions above can be combined into a single expression, 
+   *  but the complexity of the structure would be crazily high :-O
+   */
 }
