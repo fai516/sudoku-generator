@@ -8,10 +8,12 @@ body{
   font-family: $font;
 }
 #game{
+  margin: auto;
   #puzzle{
     display: grid;
     width:$size;
     height: $size;
+    margin: inherit;
     grid-template: repeat(9,1fr)/repeat(9,1fr);
 
     .square{
@@ -63,5 +65,9 @@ body{
         }
       }
     }
+  }
+  #function{
+    text-align: center;
+    margin-top: 1em;
   }
 }

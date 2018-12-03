@@ -45,15 +45,70 @@ class Game extends React.Component{
     this.state = {
       //squares: Array(81).fill("0")
       squares: dummyPuzzleExample(),
+      message: "message"
     };
     this.handleSquareInput=this.handleSquareInput.bind(this);
     this.puzzleGenerator=this.puzzleGenerator.bind(this);
+    this.checkValid=this.checkValid.bind(this);
+    this.getValueByIndex=this.getValueByIndex.bind(this);
+    this.setMessage=this.setMessage.bind(this);
+
     this.puzzleGenerator();
   }
+  setMessage(str){
+    let s = str().toString();
+    this.setState({message: s});
+  }
+  checkValid(){
+    const parameterContainer = ["row","col","grid"];
+    const cRefs = { //corresponding references
+      "row": "col",
+      "col": "row",
+      "grid": "grid"
+    };
+    for(let argu of parameterContainer){
+      const cIndexes = indexGenerator(9,cRefs[argu]);
+      console.log(`${argu}-${cIndexes}`);
+      for(let cIndex of cIndexes){
+        let indexes = indexGenerator(9,argu,cIndex)
+        const values = this.getValueByIndex(indexes)
+        if(hasRedundancy(values)) return false;
+      }
+    }
+    return true;
+  }
 
+  getValueByIndex(indexes){
+    return Array.from(indexes,x=>this.state.squares[x]);
+  }
   puzzleGenerator(){
-    let arr = Array(81).fill(0);
-    checkValid(this.state.squares);
+    let out = Array(81);
+    let possibleValue = Array(81).fill(Array.from({length:9},(x,i)=>i+1));
+
+    let randomPick = function(index){
+      let targetArray = possibleValue[index];
+      if(targetArray.length==1) return targetArray
+      let randomIndex = Math.floor(Math.random()*targetArray.length);
+      return targetArray[randomIndex];
+    }
+    let cleanUpPossibleValue = function(index,pick){
+      let row = indexGenerator(9,"row",index);
+      let col = indexGenerator(9,"col",index);
+      let grid = indexGenerator(9,"grid",index);
+      let related = filterIndexes([row,col,grid],index);
+      let l = related.length;
+      for(var i=0;i<l;i++){
+        let targetValueIndex = related[i].indexOf(pick);
+        if(targetValueIndex==-1)continue;
+        related[i][related[i].length-1] = related[i][targetValueIndex];
+        related[i].pop();
+      }
+    }
+
+    let length = out.length;
+    for(var i=0;i<length;i++){
+
+    }
   }
 
   handleSquareInput(evt){
@@ -79,6 +134,10 @@ class Game extends React.Component{
         <Puzzle sqaures={this.state.squares}
                handleSquareInput={(evt)=>this.handleSquareInput(evt)}
         />
+        <div id="function">
+          <div id="message">{this.state.message}</div>
+          <input type="button" defaultValue="Check Correctness" onClick={()=>this.setMessage(this.checkValid)}></input>
+        </div>
       </div>
     )
   }
@@ -88,14 +147,22 @@ ReactDOM.render(
   <Game />,
   document.getElementById('root')
 );
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   * hasRedundancy() check if there is repeat in the input array
   * Parameter: arr: Array of numbers
   * Return type: Boolean. True if the array contains redundant number; otherwise, false.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
 function hasRedundancy(arr){
-  let set = new Set;
-
+  let exist = new Set;
+  var length = arr.length;
+  for(var i=0;i<length;i++){
+    if(exist.has(arr[i])){
+      return true;
+    }
+    exist.add(arr[i]);
+  }
+  return false;
 }
 
 
@@ -177,40 +244,37 @@ function indexGenerator(d=9,t="row",pos){
   }
 }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * getValueByIndex(p,target=[],minIndex):
- * Purpose: convert the index array into value array.
+ * filterIndexes(target=[],minIndex):
+ * Purpose: Remove redundency and filter any index is not subpass minIndex
  * Parameter: p= The puzzle array itself. A 9 by 9 puzzle contains 81 elements/value
- *           targrt= Array of array of index. It contains a series of position you want to convert
+ *           targrt= An array of array of index. It contains a series of position you want to convert
  *           minIndex = Minimum of the index that is required. If the element of the 
  *                      target is less than or equal to minIndex, the element would not
  *                      be considered in the result array.
- * Example: targrt=[3,4,5,11,12] 
- *          -> result=[ p[3],p[4],p[5],p[11],p[12] ]
+ * Return: Array of index which is combined from the input indexes without redundency and its 
+ *         are all greater than minIndex.
+ * Example: 1.target=[[3,4,5,11,12]] 
+ *          -> result=[3,4,5,11,12]
+ *          2.target=[[3,4,5,11,12],[1,2,3,4,5,12,100]] 
+ *          -> result=[3,4,5,11,12,1,2,100]
+ *          3.target=[[3,4,5,11,12],[1,2,3,4,5,12,100]],minIndex=11 
+ *          -> result=[12,100]
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function getValueByIndex(p,target=[[]],min){
+function filterIndexes(target=[[]],minIndex){
+  if(minIndex==undefined) minIndex=-1;
   let out = [];
-  for(var i=0;i<)
-  return target.map(x=>p[x]);
-}
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function checkValid(puzzle){
-  const parameterContainer = ["row","col","grid"];
-  const cRefs = { //corresponding references
-    "row": "col",
-    "col": "row",
-    "grid": "grid"
-  };
-  for(let argu of parameterContainer){
-    const cIndexes = indexGenerator(9,cRefs[argu]);
-    console.log(`${argu}-${cIndexes}`);
-    for(let cIndex of cIndexes){
-      const indexes = getValueByIndex(puzzle,indexGenerator(9,argu,cIndex));
-
+  let exist = new Set;
+  for(var i=0;i<target.length;i++){
+    let l = target[i].length;
+    for(var j=0;j<l;j++){
+      let n = target[i][j];
+      if(!exist.has(n)&&n>minIndex){
+        exist.add(n);
+        out.push(n);
+      }
     }
   }
+  return out;
 }
 
 function dummyPuzzleExample(){

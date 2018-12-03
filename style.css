@@ -2,11 +2,16 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+#game {
+  margin: auto;
+}
+
 #game #puzzle {
   display: -ms-grid;
   display: grid;
   width: 350px;
   height: 350px;
+  margin: inherit;
   -ms-grid-rows: (1fr)[9];
   -ms-grid-columns: (1fr)[9];
       grid-template: repeat(9, 1fr)/repeat(9, 1fr);
@@ -61,5 +66,10 @@ body {
 
 #game #puzzle .square input[type="text"]:focus {
   outline: none;
+}
+
+#game #function {
+  text-align: center;
+  margin-top: 1em;
 }
 /*# sourceMappingURL=style.css.map */
