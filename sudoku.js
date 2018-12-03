@@ -60,6 +60,7 @@ class Game extends React.Component{
     this.setState({message: s});
   }
   checkValid(){
+    console.log("checkValid()");
     const parameterContainer = ["row","col","grid"];
     const cRefs = { //corresponding references
       "row": "col",
@@ -81,16 +82,57 @@ class Game extends React.Component{
   getValueByIndex(indexes){
     return Array.from(indexes,x=>this.state.squares[x]);
   }
+
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   * puzzleGenerator() randomizes puzzle configuration.
+   * Return type: Array(81)[string]
+   * Explantion:
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
   puzzleGenerator(){
-    let out = Array(81);
+    console.log("puzzleGenerator");
+    let out = Array(81); //output array initialization.
+    /* possibleValue records all possible values of the squares.
+       Initially, all 81 squares have possible value of [1-9] */
     let possibleValue = Array(81).fill(Array.from({length:9},(x,i)=>i+1));
 
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * randomPick(index):
+     * Purpose: draw a value inside possibleValue[] with selected index 
+     * Parameter: index=selected index of square.
+     * Return: Number between 1 to 9
+     * Algorithm:
+     *  1. Get the array A of possible value with input index
+     *  2. If the array A contains only one value, return the only value
+     *  3. Accquire the index of the array randomly (rIndex)
+     *  4. Return array[rIndex]
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     let randomPick = function(index){
-      let targetArray = possibleValue[index];
-      if(targetArray.length==1) return targetArray
-      let randomIndex = Math.floor(Math.random()*targetArray.length);
-      return targetArray[randomIndex];
+      let A = possibleValue[index];
+      if(A.length==1) return A[0];
+      let rIndex = Math.floor(Math.random()*A.length);
+      return A[rIndex];
     }
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * cleanUpPossibleValue(index,pick)
+     * Purpose: eliminate possible value {pick} of related indexes. 
+     *          Related indexes refers to all indexes of corresponding row, col, 
+     *          and grid. This function is always utilized along with 
+     *          randomPick().
+     * Return: Nothing Return.
+     * Algorithm:
+     *  1. Collect all index arrays of row,col,grid
+     *  2. Combine these arrays as {A} and trim out the irrelevant 
+     *     (we don't need smaller index because the generator iterate from low
+     *      to high)
+     *  3. Iterate array {A} with following:
+     *      i)   Get the index that contains a number {pick}
+     *      ii)  If it's not found, ignore all the following below and 
+     *           continue the loop
+     *      iii) If it's found, name as index {x}, replace {A[x]} with the final
+     *           value {A[-1]}
+     *      iv)  Pop the last element of array {A}.
+     *          
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     let cleanUpPossibleValue = function(index,pick){
       let row = indexGenerator(9,"row",index);
       let col = indexGenerator(9,"col",index);
@@ -288,7 +330,4 @@ function dummyPuzzleExample(){
              "248957136"+
              "763418259";
   return [...str];
-}
-function dummyStart(){
-
 }
