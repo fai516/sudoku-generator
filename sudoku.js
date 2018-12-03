@@ -42,22 +42,36 @@ class Puzzle extends React.Component{
 class Game extends React.Component{
   constructor(props){
     super(props);
+    var tmp = dummyPuzzleExample();
+
+    /* under construction */
+    this.possibleValuesOfIndexes = Array.from({length:81},
+      ()=>Array.from({length:9},(x,i)=>i+1));
+    this.possibleValuesOfIndexes.reset = function(){
+      this.possibleValuesOfIndexes = Array.from({length:81},
+      ()=>Array.from({length:9},(x,i)=>i+1));
+    }
+    /* under construction */
+
     this.state = {
-      //squares: Array(81).fill("0")
-      squares: dummyPuzzleExample(),
-      message: "message"
+      squares: Array(81).fill("0"),
+      //squares: tmp,
+      message: ""
     };
     this.handleSquareInput=this.handleSquareInput.bind(this);
     this.puzzleGenerator=this.puzzleGenerator.bind(this);
     this.checkValid=this.checkValid.bind(this);
     this.getValueByIndex=this.getValueByIndex.bind(this);
     this.setMessage=this.setMessage.bind(this);
-
-    this.puzzleGenerator();
   }
-  setMessage(str){
-    let s = str().toString();
-    this.setState({message: s});
+  setMessage(type,input){
+    var output;
+    switch(type){
+      case "Validation":output=`Puzzle is ${(input?"Valid":"NOT Valid")}`;break;
+      case "Generation":output=`Time elapsed: ${input.toString()}ms`;break;
+      default:output=""
+    }
+    this.setState({message: output});
   }
   checkValid(){
     console.log("checkValid()");
@@ -69,7 +83,6 @@ class Game extends React.Component{
     };
     for(let argu of parameterContainer){
       const cIndexes = indexGenerator(9,cRefs[argu]);
-      console.log(`${argu}-${cIndexes}`);
       for(let cIndex of cIndexes){
         let indexes = indexGenerator(9,argu,cIndex)
         const values = this.getValueByIndex(indexes)
@@ -89,11 +102,14 @@ class Game extends React.Component{
    * Explantion:
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
   puzzleGenerator(){
-    console.log("puzzleGenerator");
+    var tBegin = performance.now();
     let out = Array(81); //output array initialization.
     /* possibleValue records all possible values of the squares.
        Initially, all 81 squares have possible value of [1-9] */
-    let possibleValue = Array(81).fill(Array.from({length:9},(x,i)=>i+1));
+    let possibleValuesOfIndexes=Array.from({length:81},
+                                  ()=>Array.from({length:9},(x,i)=>i+1));
+
+
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * randomPick(index):
@@ -107,7 +123,7 @@ class Game extends React.Component{
      *  4. Return array[rIndex]
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     let randomPick = function(index){
-      let A = possibleValue[index];
+      let A = possibleValuesOfIndexes[index];
       if(A.length==1) return A[0];
       let rIndex = Math.floor(Math.random()*A.length);
       return A[rIndex];
@@ -128,31 +144,49 @@ class Game extends React.Component{
      *      i)   Get the index that contains a number {pick}
      *      ii)  If it's not found, ignore all the following below and 
      *           continue the loop
-     *      iii) If it's found, name as index {x}, replace {A[x]} with the final
-     *           value {A[-1]}
+     *      iii) If it's found, name as index {x}, replace {p[A[x]]} with the final
+     *           value {p[A[-1]]}
      *      iv)  Pop the last element of array {A}.
      *          
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     let cleanUpPossibleValue = function(index,pick){
+      //console.log(`cleanUp()\nindex=${index} pick=${pick}`)
       let row = indexGenerator(9,"row",index);
       let col = indexGenerator(9,"col",index);
       let grid = indexGenerator(9,"grid",index);
       let related = filterIndexes([row,col,grid],index);
       let l = related.length;
+      //console.log(related);
       for(var i=0;i<l;i++){
-        let targetValueIndex = related[i].indexOf(pick);
+        let PVarray = possibleValuesOfIndexes[related[i]];
+        let targetValueIndex = PVarray.indexOf(pick);
         if(targetValueIndex==-1)continue;
-        related[i][related[i].length-1] = related[i][targetValueIndex];
-        related[i].pop();
+        PVarray[targetValueIndex] = PVarray[PVarray.length-1];
+        PVarray.pop();
+      }
+    }
+    let length = out.length;
+    let again = true;
+    let maxLoop = 5000;
+    while(again&&maxLoop--){
+      possibleValuesOfIndexes=Array.from({length:81},
+        ()=>Array.from({length:9},(x,i)=>i+1));
+      for(var i=0;i<81;i++){
+        let selectedValue = randomPick(i);
+        if(selectedValue==undefined) break;
+        cleanUpPossibleValue(i,selectedValue);
+        out[i] = selectedValue;
+        if(i==80) again = false;
       }
     }
 
-    let length = out.length;
-    for(var i=0;i<length;i++){
-
-    }
+    out = out.map(x=>x.toString());
+    this.setState({
+      squares: out
+    });
+    var tEnd = performance.now();
+    return (tEnd-tBegin).toFixed(2);
   }
-
   handleSquareInput(evt){
     console.log("setState begin")
     let input = evt.nativeEvent.data;
@@ -178,7 +212,8 @@ class Game extends React.Component{
         />
         <div id="function">
           <div id="message">{this.state.message}</div>
-          <input type="button" defaultValue="Check Correctness" onClick={()=>this.setMessage(this.checkValid)}></input>
+          <input type="button" defaultValue="Check Correctness" onClick={()=>this.setMessage("Validation",this.checkValid())}></input>
+          <input type="button" defaultValue="Generare Puzzle" onClick={()=>this.setMessage("Generation",this.puzzleGenerator())}></input>
         </div>
       </div>
     )
@@ -287,7 +322,7 @@ function indexGenerator(d=9,t="row",pos){
 }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * filterIndexes(target=[],minIndex):
- * Purpose: Remove redundency and filter any index is not subpass minIndex
+ * Purpose: Remove redundency and filter any index is larger than minIndex
  * Parameter: p= The puzzle array itself. A 9 by 9 puzzle contains 81 elements/value
  *           targrt= An array of array of index. It contains a series of position you want to convert
  *           minIndex = Minimum of the index that is required. If the element of the 
