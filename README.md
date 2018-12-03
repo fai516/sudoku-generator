@@ -4,7 +4,7 @@ v1.0a. This program is basically functional. But there would be more new feature
 ## Description
 This program can generate random sudoku puzzle with "smart" brutal force.
 ## Usage
-No command line needed. Simply open index.html. But be sure turn on javascript. Recommand Browser: Latest Chrome
+SASS is optional because the css file is already compiled. Simply open index.html. But be sure turn on javascript. Recommand Browser: Latest Chrome
 ## Demonstration
 https://fai516.github.io/projects/SG/
 ## Third Party Library
