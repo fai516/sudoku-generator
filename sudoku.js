@@ -1,4 +1,5 @@
 'use strict';
+const version = "v1.0a";
 class Square extends React.Component {
   render() {
       return (
@@ -43,7 +44,6 @@ class Game extends React.Component{
   constructor(props){
     super(props);
     var tmp = dummyPuzzleExample();
-
     /* under construction */
     this.possibleValuesOfIndexes = Array.from({length:81},
       ()=>Array.from({length:9},(x,i)=>i+1));
@@ -54,6 +54,7 @@ class Game extends React.Component{
     /* under construction */
 
     this.state = {
+      version: version,
       squares: Array(81).fill("0"),
       //squares: tmp,
       message: ""
@@ -214,6 +215,7 @@ class Game extends React.Component{
           <div id="message">{this.state.message}</div>
           <input type="button" defaultValue="Check Correctness" onClick={()=>this.setMessage("Validation",this.checkValid())}></input>
           <input type="button" defaultValue="Generare Puzzle" onClick={()=>this.setMessage("Generation",this.puzzleGenerator())}></input>
+          <div id="version">{this.state.version}</div>
         </div>
       </div>
     )
